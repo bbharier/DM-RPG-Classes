@@ -3,8 +3,6 @@ package levelup2.core;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.fml.relauncher.CoreModManager;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import org.spongepowered.asm.launch.MixinBootstrap;
-import org.spongepowered.asm.mixin.Mixins;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -16,8 +14,6 @@ public class LevelUpCore implements IFMLLoadingPlugin {
     public static boolean isFastFurnacePresent = false;
 
     public LevelUpCore() {
-        MixinBootstrap.init();
-        Mixins.addConfiguration("levelup2.mixins.json");
     }
 
     @Override
