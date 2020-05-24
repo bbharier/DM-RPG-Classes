@@ -1,13 +1,9 @@
 {
-  "name": "levelup:zealot",
+  "name": "levelup:warlord",
   "bonus": "levelup:combat_bonus",
   "skills": [
     {
-      "name": "levelup:sprintspeed",
-      "level": 2
-    },
-    {
-      "name": "levelup:fallprotect",
+      "name": "levelup:swordcrit",
       "level": 1
     },
     {
@@ -15,8 +11,12 @@
       "level": 2
     },
     {
-      "name": "levelup:naturalarmor",
+      "name": "levelup:shieldblock",
       "level": 1
+    },
+    {
+      "name": "levelup:bowdraw",
+      "level": 2
     }
   ]
 }

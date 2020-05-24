@@ -1,17 +1,17 @@
 {
-  "name": "levelup:lumberjack",
-  "bonus": "levelup:craft_bonus",
+  "name": "levelup:ranger",
+  "bonus": "levelup:combat_bonus",
   "skills": [
     {
-      "name": "levelup:woodcutting",
+      "name": "levelup:bowdraw",
       "level": 2
     },
     {
-      "name": "levelup:lumbering",
+      "name": "levelup:arrowspeed",
       "level": 1
     },
     {
-      "name": "levelup:naturalarmor",
+      "name": "levelup:stealth",
       "level": 2
     },
     {

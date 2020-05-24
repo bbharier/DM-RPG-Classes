@@ -1,9 +1,13 @@
 {
-  "name": "levelup:warrior",
+  "name": "levelup:paladin",
   "bonus": "levelup:combat_bonus",
   "skills": [
     {
-      "name": "levelup:swordcrit",
+      "name": "levelup:sprintspeed",
+      "level": 2
+    },
+    {
+      "name": "levelup:fallprotect",
       "level": 1
     },
     {
@@ -11,12 +15,8 @@
       "level": 2
     },
     {
-      "name": "levelup:shieldblock",
+      "name": "levelup:naturalarmor",
       "level": 1
-    },
-    {
-      "name": "levelup:bowdraw",
-      "level": 2
     }
   ]
 }

@@ -1,0 +1,6 @@
+{
+  "name": "levelup:cleric",
+  "bonus": "levelup:combat_bonus",
+  "skills": [
+  ]
+}
