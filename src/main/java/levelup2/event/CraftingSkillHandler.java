@@ -3,8 +3,6 @@ package levelup2.event;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import levelup2.api.IProcessor;
-import levelup2.capability.CapabilityBrewingStand;
-import levelup2.capability.CapabilityFurnace;
 import levelup2.capability.PlayerCapability;
 import levelup2.config.LevelUpConfig;
 import levelup2.skills.SkillRegistry;
@@ -63,7 +61,6 @@ public class CraftingSkillHandler {
     private CraftingSkillHandler() {}
 
     private Random rand = new Random();
-    private static final ResourceLocation FURNACEMODS = new ResourceLocation("levelup", "furnacemods");
     private static final ResourceLocation FISHBONUS = new ResourceLocation("levelup", "fishbonus");
     private static final ResourceLocation CROPGROWTH = new ResourceLocation("levelup", "cropgrowth");
     private static final ResourceLocation HARVESTBONUS = new ResourceLocation("levelup", "harvestbonus");
@@ -82,7 +79,7 @@ public class CraftingSkillHandler {
                         }
                     }
                     if (experienceGain > 0)
-                        SkillRegistry.addExperience(evt.player, experienceGain);
+                        SkillRegistry.addExperience(evt.player, experienceGain); 
                 }
             }
         }
@@ -245,62 +242,6 @@ public class CraftingSkillHandler {
     }
 
     @SubscribeEvent
-    public void registerTileCapability(AttachCapabilitiesEvent<TileEntity> evt) {
-        if (evt.getObject() instanceof TileEntityFurnace) {
-            final TileEntityFurnace furnace = (TileEntityFurnace)evt.getObject();
-            evt.addCapability(FURNACEMODS, new ICapabilitySerializable<NBTTagCompound>() {
-                IProcessor instance = new CapabilityFurnace(furnace);
-
-                @Override
-                public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-                    return capability == PlayerCapability.MACHINE_PROCESSING;
-                }
-
-                @Override
-                public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-                    return capability == PlayerCapability.MACHINE_PROCESSING ? PlayerCapability.MACHINE_PROCESSING.<T>cast(instance) : null;
-                }
-
-                @Override
-                public NBTTagCompound serializeNBT() {
-                    return ((NBTTagCompound)PlayerCapability.MACHINE_PROCESSING.getStorage().writeNBT(PlayerCapability.MACHINE_PROCESSING, instance, null));
-                }
-
-                @Override
-                public void deserializeNBT(NBTTagCompound tag) {
-                    PlayerCapability.MACHINE_PROCESSING.getStorage().readNBT(PlayerCapability.MACHINE_PROCESSING, instance, null, tag);
-                }
-            });
-        }
-        else if (evt.getObject() instanceof TileEntityBrewingStand) {
-            final TileEntityBrewingStand stand = (TileEntityBrewingStand)evt.getObject();
-            evt.addCapability(FURNACEMODS, new ICapabilitySerializable<NBTTagCompound>() {
-                IProcessor instance = new CapabilityBrewingStand(stand);
-
-                @Override
-                public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-                    return capability == PlayerCapability.MACHINE_PROCESSING;
-                }
-
-                @Override
-                public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-                    return capability == PlayerCapability.MACHINE_PROCESSING ? PlayerCapability.MACHINE_PROCESSING.<T>cast(instance) : null;
-                }
-
-                @Override
-                public NBTTagCompound serializeNBT() {
-                    return ((NBTTagCompound)PlayerCapability.MACHINE_PROCESSING.getStorage().writeNBT(PlayerCapability.MACHINE_PROCESSING, instance, null));
-                }
-
-                @Override
-                public void deserializeNBT(NBTTagCompound tag) {
-                    PlayerCapability.MACHINE_PROCESSING.getStorage().readNBT(PlayerCapability.MACHINE_PROCESSING, instance, null, tag);
-                }
-            });
-        }
-    }
-
-    @SubscribeEvent
     public void onTileInteracted(PlayerInteractEvent.RightClickBlock evt) {
         if (!evt.getWorld().isRemote && evt.getEntityPlayer() != null) {
             EntityPlayer player = evt.getEntityPlayer();
@@ -326,107 +267,5 @@ public class CraftingSkillHandler {
                 }
             }
         }
-    }/*
-
-    private Map<Integer, List<TileEntity>> processors = Maps.newHashMap();
-    private Map<Integer, List<TileEntity>> toAdd = Maps.newHashMap();
-    private Map<Integer, List<TileEntity>> toRemove = Maps.newHashMap();
-
-    @SubscribeEvent
-    public void onChunkLoad(ChunkEvent.Load evt) {
-        if (!evt.getWorld().isRemote) {
-            Map<BlockPos, TileEntity> tiles = evt.getChunk().getTileEntityMap();
-            List<TileEntity> toAdd = this.toAdd.get(evt.getWorld().provider.getDimension());
-            for (BlockPos pos : tiles.keySet()) {
-                TileEntity tile = evt.getWorld().getTileEntity(pos);
-                if (tile != null && tile.hasCapability(PlayerCapability.MACHINE_PROCESSING, EnumFacing.UP)) {
-                    toAdd.add(tile);
-                }
-            }
-        }
     }
-
-    @SubscribeEvent
-    public void onChunkUnload(ChunkEvent.Unload evt) {
-        if (!evt.getWorld().isRemote) {
-            Map<BlockPos, TileEntity> tiles = evt.getChunk().getTileEntityMap();
-            List<TileEntity> toRemove = this.toRemove.get(evt.getWorld().provider.getDimension());
-            List<TileEntity> processors = this.processors.get(evt.getWorld().provider.getDimension());
-            for (TileEntity tile : tiles.values()) {
-                if (processors.contains(tile)) {
-                    toRemove.add(tile);
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public void onWorldLoad(WorldEvent.Load evt) {
-        if (!evt.getWorld().isRemote) {
-            processors.put(evt.getWorld().provider.getDimension(), Lists.newArrayList());
-            toAdd.put(evt.getWorld().provider.getDimension(), Lists.newArrayList());
-            toRemove.put(evt.getWorld().provider.getDimension(), Lists.newArrayList());
-        }
-    }
-
-    @SubscribeEvent
-    public void onWorldUnload(WorldEvent.Unload evt) {
-        if (!evt.getWorld().isRemote) {
-            processors.remove(evt.getWorld().provider.getDimension());
-            toAdd.remove(evt.getWorld().provider.getDimension());
-            toRemove.remove(evt.getWorld().provider.getDimension());
-        }
-    }
-
-    @SubscribeEvent
-    public void doFurnaceTicks(TickEvent.WorldTickEvent evt) {
-        if (evt.world.isRemote || evt.phase == TickEvent.Phase.END || evt.side != Side.SERVER) return;
-        if (processors.containsKey(evt.world.provider.getDimension())) {
-            List<TileEntity> processors = this.processors.get(evt.world.provider.getDimension());
-            if (evt.world.getWorldTime() % 100 == 0) {
-                List<TileEntity> loadedTiles = evt.world.loadedTileEntityList.stream().filter(t -> t.hasCapability(PlayerCapability.MACHINE_PROCESSING, EnumFacing.UP)).collect(Collectors.toList());
-                for (TileEntity tile : processors) {
-                    if (!loadedTiles.contains(tile))
-                        toRemove.get(evt.world.provider.getDimension()).add(tile);
-                }
-                for (TileEntity tile : loadedTiles) {
-                    if (!processors.contains(tile))
-                        processors.add(tile);
-                }
-            }
-            if (toAdd.containsKey(evt.world.provider.getDimension()) && !toAdd.get(evt.world.provider.getDimension()).isEmpty()) {
-                List<TileEntity> toAdd = this.toAdd.get(evt.world.provider.getDimension());
-                processors.addAll(toAdd);
-                toAdd.clear();
-            }
-            if (toRemove.containsKey(evt.world.provider.getDimension()) && !toRemove.get(evt.world.provider.getDimension()).isEmpty()) {
-                List<TileEntity> toRemove = this.toRemove.get(evt.world.provider.getDimension());
-                processors.removeAll(toRemove);
-                toRemove.clear();
-            }
-            if (!processors.isEmpty()) {
-                for (TileEntity tile : processors) {
-                    if (tile != null && tile.getWorld().getChunk(tile.getPos()).isLoaded()) {
-                        IProcessor p = tile.getCapability(PlayerCapability.MACHINE_PROCESSING, EnumFacing.UP);
-                        processTick(p);
-                    }
-                }
-            }
-        }
-        List<IProcessor> tiles = Lists.newArrayList();
-        try {
-            synchronized (evt.world.loadedTileEntityList) {
-                tiles = evt.world.loadedTileEntityList.stream().filter(t -> t != null && t.hasCapability(PlayerCapability.MACHINE_PROCESSING, EnumFacing.UP)).map(t -> t.getCapability(PlayerCapability.MACHINE_PROCESSING, EnumFacing.UP)).collect(Collectors.toList());
-            }
-        } catch (ConcurrentModificationException e) {
-
-        }
-        tiles.forEach(this::processTick);
-    }
-
-    private void processTick(IProcessor tile) {
-        if (tile != null && tile.getPlayerFromUUID() != null) {
-            tile.extraProcessing(tile.getPlayerFromUUID());
-        }
-    }*/
 }
